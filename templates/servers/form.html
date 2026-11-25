@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <h1 class="h3 mb-3">{{ title }}</h1>
+    <form method="post" class="card border-0 shadow-sm">
+      <div class="card-body">
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+          {{ form.display_name.label(class_="form-label") }}
+          {{ form.display_name(class_="form-control") }}
+          {% for e in form.display_name.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="row">
+          <div class="col-md-8 mb-3">
+            {{ form.host.label(class_="form-label") }}
+            {{ form.host(class_="form-control") }}
+            {% for e in form.host.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="col-md-4 mb-3">
+            {{ form.ssh_port.label(class_="form-label") }}
+            {{ form.ssh_port(class_="form-control") }}
+            {% for e in form.ssh_port.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+        <div class="mb-3">
+          {{ form.ssh_username.label(class_="form-label") }}
+          {{ form.ssh_username(class_="form-control") }}
+          {% for e in form.ssh_username.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="mb-3">
+          {{ form.auth_method.label(class_="form-label") }}
+          {{ form.auth_method(class_="form-select", id="auth_method") }}
+        </div>
+        <div class="mb-3" id="password-fields">
+          {{ form.ssh_password.label(class_="form-label") }}
+          {{ form.ssh_password(class_="form-control", autocomplete="new-password", placeholder="Leave blank on edit to keep existing") }}
+          {% for e in form.ssh_password.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="mb-3" id="key-fields">
+          {{ form.ssh_key_path.label(class_="form-label") }}
+          {{ form.ssh_key_path(class_="form-control", placeholder="/path/to/private_key") }}
+          {% for e in form.ssh_key_path.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="d-flex gap-2">
+          {{ form.submit(class_="btn btn-primary") }}
+          {{ form.test_connection(class_="btn btn-outline-secondary") }}
+          <a class="btn btn-link" href="{{ url_for('servers.list_servers') }}">Cancel</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+  function toggleAuth() {
+    const method = document.getElementById('auth_method').value;
+    document.getElementById('password-fields').style.display = method === 'password' ? '' : 'none';
+    document.getElementById('key-fields').style.display = method === 'key' ? '' : 'none';
+  }
+  document.getElementById('auth_method').addEventListener('change', toggleAuth);
+  toggleAuth();
+</script>
+{% endblock %}
