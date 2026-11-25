@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}{{ server.display_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h1 class="h3 mb-1">{{ server.display_name }}</h1>
+    <p class="text-secondary mb-0 small">{{ server.host }}:{{ server.ssh_port }} · user {{ server.ssh_username }} · refresh 10s</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('servers.edit_server', server_id=server.id) }}">Edit</a>
+    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('main.dashboard') }}">Dashboard</a>
+  </div>
+</div>
+
+<div id="detail-metrics" data-server-id="{{ server.id }}">
+  <div class="mb-3">
+    <span class="badge status-badge {% if metrics.reachable %}text-bg-success{% else %}text-bg-danger{% endif %}">
+      {% if metrics.reachable %}reachable{% else %}unreachable{% endif %}
+    </span>
+    {% if not metrics.reachable %}
+      <span class="text-danger small ms-2 error-msg">{{ metrics.error }}</span>
+    {% endif %}
+  </div>
+
+  <div class="row g-3 reachable-block {% if not metrics.reachable %}d-none{% endif %}">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-secondary small">CPU</div>
+          <div class="display-6 cpu">{{ metrics.cpu_percent if metrics.cpu_percent is not none else '—' }}%</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-secondary small">Memory</div>
+          <div class="display-6 mem">{{ metrics.memory_percent if metrics.memory_percent is not none else '—' }}%</div>
+          <div class="small text-secondary mem-detail">
+            {% if metrics.memory_used is not none %}{{ metrics.memory_used }} / {{ metrics.memory_total }} B{% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-secondary small">Auth</div>
+          <div>{{ server.auth_method }}</div>
+          <div class="small text-secondary">Credentials never shown</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">Network counters</div>
+        <div class="card-body p-0">
+          <table class="table mb-0">
+            <thead><tr><th>Interface</th><th>RX bytes</th><th>TX bytes</th></tr></thead>
+            <tbody class="net-body">
+              {% for n in metrics.network %}
+              <tr><td>{{ n.interface }}</td><td>{{ n.rx_bytes }}</td><td>{{ n.tx_bytes }}</td></tr>
+              {% else %}
+              <tr><td colspan="3" class="text-secondary">No interfaces</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">Listening ports</div>
+        <div class="card-body p-0">
+          <table class="table mb-0">
+            <thead><tr><th>State</th><th>Local</th><th>Process</th></tr></thead>
+            <tbody class="ports-body">
+              {% for p in metrics.ports %}
+              <tr><td>{{ p.state }}</td><td>{{ p.local }}</td><td class="small">{{ p.process }}</td></tr>
+              {% else %}
+              <tr><td colspan="3" class="text-secondary">No ports</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/refresh.js') }}"></script>
+<script>initDetailRefresh(10000);</script>
+{% endblock %}

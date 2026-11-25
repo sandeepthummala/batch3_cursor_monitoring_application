@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Servers{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h1 class="h3 mb-1">Servers</h1>
+    <p class="text-secondary mb-0 small">Configured hosts (SSH passwords never displayed)</p>
+  </div>
+  <a class="btn btn-primary btn-sm" href="{{ url_for('servers.add_server') }}">Add server</a>
+</div>
+
+{% if not servers %}
+  <div class="alert alert-light border">No servers yet.</div>
+{% else %}
+  <div class="table-responsive bg-white shadow-sm rounded">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Host</th>
+          <th>Port</th>
+          <th>User</th>
+          <th>Auth</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in servers %}
+        <tr>
+          <td><a href="{{ url_for('main.server_detail', server_id=s.id) }}">{{ s.display_name }}</a></td>
+          <td>{{ s.host }}</td>
+          <td>{{ s.ssh_port }}</td>
+          <td>{{ s.ssh_username }}</td>
+          <td>{{ s.auth_method }}</td>
+          <td class="text-end text-nowrap">
+            <form method="post" action="{{ url_for('servers.test_server', server_id=s.id) }}" class="d-inline">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-sm btn-outline-secondary" type="submit">Test</button>
+            </form>
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('servers.edit_server', server_id=s.id) }}">Edit</a>
+            <a class="btn btn-sm btn-outline-danger" href="{{ url_for('servers.delete_server', server_id=s.id) }}">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+{% endblock %}
